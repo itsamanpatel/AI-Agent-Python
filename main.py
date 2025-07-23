@@ -1,4 +1,5 @@
 from openai import OpenAI
+from google import genai
 import os
 from dotenv import load_dotenv
 from actions import get_response_time
@@ -11,13 +12,22 @@ load_dotenv()
 # Create an instance of the OpenAI class
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-def generate_text_with_conversation(messages, model = "gpt-3.5-turbo"):
+def generate_text_with_conversation_OPENAI(messages, model = "gpt-3.5-turbo"):
     response = openai_client.chat.completions.create(
         model=model,
         messages=messages
         )
     return response.choices[0].message.content
+
+
+def generate_text_with_conversation_GEMINI(messages, model="gemini-2.5-flash"):
+    response = client.models.generate_content(
+                model=model,
+                contents=messages
+                )
+    return response.text
 
 # Available actions are defined in actions.py
 available_actions = {
@@ -42,7 +52,8 @@ while turn_count < max_turns:
     print("----------------------")
     turn_count += 1
 
-    response = generate_text_with_conversation(messages, model="gpt-3.5-turbo")
+    # response = generate_text_with_conversation_OPENAI(messages, model="gpt-3.5-turbo")
+    response=generate_text_with_conversation_GEMINI(messages, model="gemini-2.5-flash")
 
     print(response)
 
